@@ -1,9 +1,10 @@
 import os
+import xml.etree.ElementTree as ET
 
 from Bio import SeqIO
 from Bio.Seq import Seq
+import click
 import pandas as pd
-import xml.etree.ElementTree as ET
 
 
 def xml2df(xml_path, xmls, energies):
@@ -274,11 +275,13 @@ def csv_output(validated_dfs, manual_dfs, rejected_dfs, path, energies):
             )
 
 
-if __name__ == "__main__":
-    fasta_path = "../../data/fastas"
+@click.command()
+@click.option('--input-dir', 'input_dir', default=None, help='The location of the Fasta and xQuest merged_xml input files')
+@click.option('--output-dir', 'output_dir', default=None, help='The location to output the CSV result files')
+def cli(input_dir, output_dir):
+    fasta_path = os.path.join(input_dir, "fasta")
     fasta_file = os.path.join(fasta_path, "9_mix.fasta")
-    xml_path = "../../data/xq_xmls"
-    out_path = "../../data/validateXL_results" 
+    xml_path = os.path.join(input_dir, "xq_xmls")
 
     energies = ['mid']
     xmls = [
@@ -289,6 +292,10 @@ if __name__ == "__main__":
     format_dfs = clean_xml_data(create_df, energies)
     abspos_dfs = get_seq_id(format_dfs, fasta_file)
     validated_dfs, manual_dfs, rejected_dfs = validated_results(
-        abspos_dfs, out_path, energies
+        abspos_dfs, output_dir, energies
     )
-    csv_output(validated_dfs, manual_dfs, rejected_dfs, out_path, energies)
+    csv_output(validated_dfs, manual_dfs, rejected_dfs, output_dir, energies)
+
+
+if __name__ == "__main__":
+    cli()
