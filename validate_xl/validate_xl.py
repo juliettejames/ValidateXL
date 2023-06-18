@@ -1,42 +1,7 @@
-"""
-Validate_xl.py analyses the xQuest merged_xquest.xml files which are 
-generated and stored in the xQuest result file after a completed
-search. 
-Validate_xl.py will run on multiple xQuest search results.
-
-Inputs: merged_xquest.xml, fasta file, paths to each location, 
-a list of result identifiers. Please note these identifiers will be used
-in the resulting CSV output. 
-
-Outputs: 3 CSV files for each result file analysed labelled as follows:
-    * identifier_validated_results.csv
-    These results have sufficent crosslink peaks and sequence coverage to
-    be defined as genuine crosslinks.
-    * identifier_rejected_results.csv
-    These results have poor annotated sequence coverage and should not be
-    regarded as crosslinks.
-    * identifier_manual_results.csv
-    These results would benefit from manual validation of the spectral 
-    quality to confirm the presence of a crosslink.
-
-Validate_xl.py currently works on linux based operating systems
-
-To execute enter the files names and full paths for both the fasta file 
-and the xml files. Validate_xl.py can be run directly from the directory it 
-is stored in by typing "python validate_xl.py"
-The result files will be placed in the same location as the XML files. 
-
-===========================================================================
-Author: Juliette M.B James 21/11/2017
-This code is offered under a GNU GPLv3 License. For more details on 
-licensing terms please see: https://choosealicense.com/licenses/gpl-3.0/
-"""
 import os
 
 from Bio import SeqIO
 from Bio.Seq import Seq
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import pandas as pd
 import xml.etree.ElementTree as ET
 
@@ -295,44 +260,16 @@ def csv_output(validated_dfs, manual_dfs, rejected_dfs, path, energies):
 
 
 if __name__ == "__main__":
-    fasta_path = "/Users/juliette/Dropbox/PhD/data/7_fastas/"
+    fasta_path = "../../data/fastas"
     fasta_file = os.path.join(fasta_path, "9_mix.fasta")
-    xml_path = "/Users/juliette/Dropbox/PhD/data/2_proteins/" \
-        "new_calib_params/final_bsa_trip/comp_sol"
-    out_path = "/Users/juliette/Dropbox/PhD/data/2_proteins/" \
-        "new_calib_params/final_bsa_trip/comp_sol/validate_results"
+    xml_path = "../../data/xq_xmls"
+    out_path = "../../data/validateXL_results" 
 
-    energies = ['1_IM-DDA_cs']
+    energies = ['mid']
     xmls = [
         "9mix_imcs_merged_xquest.xml" 
     ]
-    """
-    energies = [
-        'HD_1', 'HDiTRAQ_1', 'Def_1', 'DefiTRAQ_1','Low_1', 'Wide_1',
-        'HD_2', 'HDiTRAQ_2', 'Def_2', 'DefiTRAQ_2','Low_2', 'Wide_2',
-        'HD_3', 'HDiTRAQ_3', 'Def_3', 'DefiTRAQ_3','Low_3', 'Wide_3'
-    ]
-    xmls = [
-        "hd1_merged_xquest.xml",
-        "hdi1_merged_xquest.xml",
-        "def1_merged_xquest.xml",
-        "defi1_merged_xquest.xml",
-        "low1_merged_xquest.xml",
-        "wide1_merged_xquest.xml",
-        "hd2_merged_xquest.xml",
-        "hdi2_merged_xquest.xml",
-        "def2_merged_xquest.xml",
-        "defi2_merged_xquest.xml",
-        "low2_merged_xquest.xml",
-        "wide2_merged_xquest.xml",
-        "hd3_merged_xquest.xml",
-        "hdi3_merged_xquest.xml",
-        "def3_merged_xquest.xml",
-        "defi3_merged_xquest.xml",
-        "low3_merged_xquest.xml",
-        "wide3_merged_xquest.xml",
-    ]
-    """
+
     create_df = xml2df(xml_path, xmls, energies)
     format_dfs = clean_xml_data(create_df, energies)
     abspos_dfs = get_seq_id(format_dfs, fasta_file)
