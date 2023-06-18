@@ -9,6 +9,21 @@ import xml.etree.ElementTree as ET
 def xml2df(xml_path, xmls, energies):
     """
     Creates a list of dataframes from the xQuest result xml files.
+    
+    Parameters
+    ----------
+    xml_path: `str`
+        Path to XML files
+    xmls: `str`
+        Name of xQuest XML result files
+    energies: `str`
+        The energy ramp used in the mass spec analysis
+
+    Returns
+    -------
+    xml_dfs: `list`
+        List of DataFrames containing crosslink identifications from the
+        xQuest result files.
     """
     xml_dfs = []
     for i, xml in enumerate(xmls):
