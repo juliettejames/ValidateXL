@@ -1,6 +1,8 @@
 ValidateXL
 ==========
 
+![Image of ValidateXL flow chart](./media/validateXL_process_diagram.png)
+
 Validate_xl.py analyses the xQuest merged_xquest.xml files which are 
 generated and stored in the xQuest result file after a completed
 search. 
