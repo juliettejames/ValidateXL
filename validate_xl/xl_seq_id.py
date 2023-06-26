@@ -23,6 +23,17 @@ class XlSeqId:
         Biopython Seq.find(). Finally adds the position to the topology to get
         AbsPos1 and Abspos2 for both peptides and creates a new DF column.
         This function is called internally by get_seq_id().
+
+        Parameters
+        ----------
+        df: `pd.DataFrame`
+            DataFrame containing the cleaned records from the xQuest xml file
+        record_dict: `dict`
+            Dictionary of the header details from the FASTA file obtained by 
+            Biopython.SeqIO
+        pep_idx: `int`
+            1 or 2 indicating whether the peptide in the crosslink is the 
+            alpha (1) or beta (2) peptide.
         """
         protein = list(df['prot%s' % pep_idx])
         xl = list(df['seq%s' % pep_idx])
@@ -42,6 +53,12 @@ class XlSeqId:
         seq2 but NOT in Id as this affects the substring matching from the
         fasta file and AbsPos calculation. Calls extract_amino_acid_position
         to find the correct position of the crosslinker.
+
+        Returns
+        -------
+        abspos_df: `pd.DataFrame`
+            DataFrame containing position of the crosslink in the protein
+            rather than just the position in the peptide.
         """
         # Make dictionary of all proteins in fastafile, key = xQ protein Id
         # Value = Objects including seq
@@ -68,6 +85,14 @@ class XlSeqId:
 
     def __call__(self):
         """
+        Generates DataFrame containing xQuest results and the postion of the 
+        crosslink in the overall protein sequence.
+
+        Returns
+        -------
+        abspos_df: `pd.DataFrame`
+            DataFrame containing position of the crosslink in the protein
+            rather than just the position in the peptide.
         """
         abspos_df = self.get_seq_id()
         return abspos_df
