@@ -6,7 +6,7 @@ import click
 import pandas as pd
 
 from xml_to_df import XMLToDataFrame
-
+from xl_seq_id import XlSeqId
 
 def clean_xml_data(xml_df):
     """
@@ -62,55 +62,6 @@ def clean_xml_data(xml_df):
     ]
     # extract crosslinks only
     clean_df = tp_ab[tp_ab['type'] == 'xlink']
-    return clean_df
-
-
-def extract_amino_acid_position(df, record_dict, pep_idx):
-    """
-    Make lists of the column values for protein id sequence and topology
-    loops through searching and extracting amino acid position number using 
-    Biopython Seq.find(). Finally adds the position to the topology to get
-    AbsPos1 and Abspos2 for both peptides and creates a new DF column.
-    This function is called internally by get_seq_id().
-    """
-    protein = list(df['prot%s' % pep_idx])
-    xl = list(df['seq%s' % pep_idx])
-    top = list(df['top%s' % pep_idx].apply(pd.to_numeric))
-    AbsPos = []
-    for i, prot in enumerate(protein):
-        my_seq = Seq(str(record_dict[prot].seq))
-        pos = my_seq.find(xl[i])
-        AbsPos.append(pos + top[i])
-    df['AbsPos%s' % pep_idx] = AbsPos
-
-
-def get_seq_id(clean_df, fasta_file):
-    """
-    Makes a dictionary of all proteins in the fasta. Extracts the topology
-    of the crosslinker position. Replaces oxidised Methionine in seq1 and 
-    seq2 but NOT in Id as this affects the substring matching from the
-    fasta file and AbsPos calculation. Calls extract_amino_acid_position
-    to find the correct position of the crosslinker.
-    """
-    # Make dictionary of all proteins in fastafile, key = xQ protein Id
-    # Value = Objects including seq
-    record_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
-    print("Obtaining Crosslink Position from Fasta File...")
-
-    # Create Alpha and Beta topology indices
-    topolgy = clean_df['id'].str.extract(
-        "[A-Z]+-[A-Z]+-a(?P<atop>\d+)-b(?P<btop>\d+)", expand=False
-    )
-    clean_df['top1'] = topolgy.atop
-    clean_df['top2'] = topolgy.btop
-
-    # Replace all X with M in Id as oxidation state of M is irrelevant 
-    # for position
-    clean_df['seq1'] = clean_df['seq1'].str.replace('X', 'M')
-    clean_df['seq2'] = clean_df['seq2'].str.replace('X', 'M')
-
-    extract_amino_acid_position(clean_df, record_dict, 1)
-    extract_amino_acid_position(clean_df, record_dict, 2)
     return clean_df
 
 
@@ -225,10 +176,10 @@ def cli(input_dir, output_dir):
     xml_path = os.path.join(input_dir, "xq_xmls")
     xml_file = "9mix_imcs_merged_xquest.xml"
 
-    xml_to_df = XMLToDataFrame(xml_path, xml_file)
-    create_df = xml_to_df()
+    create_df = XMLToDataFrame(xml_path, xml_file)()
     format_df = clean_xml_data(create_df)
-    abspos_df = get_seq_id(format_df, fasta_file)
+
+    abspos_df = XlSeqId(fasta_path, fasta_file, format_df)() 
     validated_df, manual_df, rejected_df = validated_results(
         abspos_df, output_dir, xml_file
     )
